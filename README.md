@@ -12,11 +12,57 @@ pip install devlxd
 
 ## Usage Example
 
+### Script to make use of the library
+
+The following is the default script through which you can use the library. You may enable execution for this and added to the path so you have it available globally.
+
 ```python
 from devlxd import ContainerFactory
 
 if __name__=="__main__":
 	devlxd_object = ContainerFactory()
 	devlxd_object.start()
+```
+
+
+
+### CLI options
+
+```shell
+--- LXD/pylxd-dev ‹master› » python example.py -h
+Usage: example.py [options] <container_name>
+
+Options:
+  -h, --help            show this help message and exit
+  -a ALIAS, --alias=ALIAS
+                        specify image alias at container creation
+  -l SCRIPT, --load=SCRIPT
+                        load shell script to be run in the container as root
+  -i INSTALL, --install=INSTALL
+                        load json file that containes installlations
+  --arch=ARCH           specify architecture
+  --sysarch             use system architecure
+```
+
+#### Create container
+
+Let's create a new container. You will be prompted to introduce a password for ubuntu user, such that we can ssh into it.
+
+```shell
+--- LXD/pylxd-dev ‹master* ?› » python example.py -a ubuntu/20.10 lxc-test
+14:32:44: Building container with config={'architecture': '', 'config': {}, 'devices': {}, 'name': 'lxc-test', 'source': {'type': 'image', 'alias': 'ubuntu/20.10', 'mode': 'pull', 'protocol': 'simplestreams', 'server': 'https://images.linuxcontainers.org'}}
+14:32:46: Container started! Wait to establish connection...
+14:32:47: Update, passwd and setup ssh.
+Password for user ubuntu: 
+...
+...
+...
+14:34:29: Addresses = [{'family': 'inet', 'address': '10.102.37.41', 'netmask': '24', 'scope': 'global'}, {'family': 'inet6', 'address': 'fd42:e96a:3c03:c316:216:3eff:fee1:ace6', 'netmask': '64', 'scope': 'global'}, {'family': 'inet6', 'address': 'fe80::216:3eff:fee1:ace6', 'netmask': '64', 'scope': 'link'}]
+```
+
+At the end you will be given address information about the container which we can use to ssh into it.
+
+```shell
+ssh ubuntu@10.102.37.41
 ```
 
