@@ -137,10 +137,3 @@ class ContainerFactory(object):
 
     def run_script(self, filename):
         pass
-
-
-if __name__ == "__main__":
-    lxd_creation = ContainerFactory()
-    lxd_creation.start()
-    # container = create_container()
-    # setup_container(container)
