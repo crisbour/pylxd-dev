@@ -135,5 +135,16 @@ class ContainerFactory(object):
         addresses = self.container.state().network['eth0']['addresses']
         logging.info(f"Addresses = {addresses}")
 
-    def run_script(self, filename):
-        pass
+    def run_script(self, file):
+        # Read the script and copy it into the container in /tmp
+        filedata = open(file).read()
+        filename = file.split('/')[-1]
+        filelocation = '/tmp/'+filename
+        logging.info(f'Copy and execute script {filename} in container {self.name}')
+        self.container.files.put(filelocation, filedata)
+
+        # Execute the script just copied
+        result = self.container.execute(['sh', filelocation])
+        logging.info(f"result: {result.exit_code}")
+        logging.info(f"stdout: {result.stdout}")
+        logging.info(f"stderr: {result.stderr}")
