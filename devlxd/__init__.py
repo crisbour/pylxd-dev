@@ -187,8 +187,9 @@ class ContainerFactory(object):
         if(self.privileged):
             if(dirsplit[0]=='.' or len(dirsplit)==1):
                 dirsource = os.getcwd() + '/' + dirname
+            dirdevice = dirname+'-dev'
             logging.info(f'Container privileged: Mounting host directory {dirsource} at container path {dirdest}')
-            self.container.devices.update({'test-dev':{'path':'/home/ubuntu/test-dir', 'source': '/home/cristi/Documents/Scripts/Python/LXD/pylxd-dev/test-dir', 'type': 'disk'}})
+            self.container.devices.update({dirdevice:{'path':dirdest, 'source': dirsource, 'type': 'disk'}})
             self.container.save(wait=True)
         else:
             logging.info(f'Container unprivileged: Copy directory {dirsource} to {dirdest}')
