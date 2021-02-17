@@ -187,7 +187,7 @@ class ContainerFactory(object):
         if(self.privileged):
             if(dirsplit[0]=='.' or len(dirsplit)==1):
                 dirsource = os.getcwd() + '/' + dirname
-            logging.info(f'Container privileged: lxc config device add {self.container.name} {"sha2-design"} disk source={dirsource} path={dirdest}')
+            logging.info(f'Container privileged: Mounting host directory {dirsource} at container path {dirdest}')
             self.container.devices.update({'test-dev':{'path':'/home/ubuntu/test-dir', 'source': '/home/cristi/Documents/Scripts/Python/LXD/pylxd-dev/test-dir', 'type': 'disk'}})
             self.container.save(wait=True)
         else:
