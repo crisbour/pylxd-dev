@@ -7,6 +7,8 @@ Therefore, this library handles launching linux containers with enabled ssh, in 
 ## Install library
 
 ```shell
+git clone https://github.com/cristi-bourceanu/pylxd-dev
+cd pylxd-dev
 pip install .
 ```
 
