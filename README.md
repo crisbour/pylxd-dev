@@ -72,7 +72,7 @@ ssh ubuntu@10.102.37.41
 
 Unprivileged:
 
-```
+```shell
 --- LXD/pylxd-dev ‹master* M?› » python example.py -m devlxd lxc-test
 01:51:56: Container with name lxc-test already exists.                            
 Accepting only configurations options.
