@@ -7,7 +7,7 @@ Therefore, this library handles launching linux containers with enabled ssh, in 
 ## Install library
 
 ```shell
-pip install devlxd
+pip install .
 ```
 
 ## Usage Example
@@ -36,10 +36,12 @@ Options:
   -h, --help            show this help message and exit
   -a ALIAS, --alias=ALIAS
                         specify image alias at container creation
-  -l SCRIPT, --load=SCRIPT
+  -p, --priv            privileged container: security.privileged=true
+  -m MOUNTS, --mount=MOUNTS
+                        mount specified directory in container at
+                        /home/ubuntu/<directory>
+  -l SCRIPTS, --load=SCRIPTS
                         load shell script to be run in the container as root
-  -i INSTALL, --install=INSTALL
-                        load json file that containes installlations
   --arch=ARCH           specify architecture
   --sysarch             use system architecure
 ```
@@ -64,5 +66,27 @@ At the end you will be given address information about the container which we ca
 
 ```shell
 ssh ubuntu@10.102.37.41
+```
+
+#### Share files
+
+Unprivileged:
+
+```
+--- LXD/pylxd-dev ‹master* M?› » python example.py -m devlxd lxc-test
+01:51:56: Container with name lxc-test already exists.                            
+Accepting only configurations options.
+01:51:56: Container lxc-test info: (alias, arch, privileged) = (Ubuntu/groovy,amd64,False)
+01:51:56: Container unprivileged: Copy directory devlxd to /home/ubuntu
+```
+
+Privileged:
+
+```shell
+--- LXD/pylxd-dev ‹master* M?› » python example.py -m devlxd lxc-test
+02:23:30: Container with name lxc-test already exists.                            
+Accepting only configurations options.
+02:23:30: Container lxc-test info: (alias, arch, privileged) = (Ubuntu/groovy,amd64,True)
+02:23:30: Container privileged: Mounting host directory /home/cristi/Documents/Scripts/Python/LXD/pylxd-dev/devlxd at container path /home/ubuntu/devlxd
 ```
 
