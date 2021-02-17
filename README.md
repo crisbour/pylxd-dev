@@ -1,8 +1,8 @@
 # LXD Environment
 
-This is a python library to help automate creation of new LXC/LXD containers. Linux containers are more like a lightweight OS VM rather than meant for applications like Docker. While Docker has  a large variety of examples and huge community, its strongest point, minimal containers, could also be its defects when it comes to development and testing environments.
+This is a python library to help automate creation of new LXC/LXD containers. Linux containers are system containers compared with application containers like Docker. That is, the container behaves like a generic host, rather than having a minimalistic container meant to run in a cluster of applications containers. This enables using them for development and testing environments of any kind of software, removing the need to worry about software versions and what paths you might break in your personal host.
 
-Therefore, this library handles launching linux containers with enabled ssh, in order to be capable of connecting `vs code` to it and develop your project like it would be on the host.
+Therefore, this library handles launching linux containers with enabled ssh, in order to be capable of connecting `vs code` to it (or any other text editor capable of remote editing) and develop your project like it would be on the host.
 
 ## Install library
 
