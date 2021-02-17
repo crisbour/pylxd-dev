@@ -6,12 +6,14 @@ import time
 import logging
 import crypt
 import getpass
+import os
 
 class ContainerFactory(object):
     arch = ''
     alias = ''
+    privileged = False
     scripts = []
-    install = []
+    mounts = []
     _available_arch = ['amd64', 'x86_64', 'aarch64', 'i686', 'ppc64le', 's390x']
     def __init__(self):
         logging.basicConfig(format="%(asctime)s: %(message)s", 
@@ -30,6 +32,7 @@ class ContainerFactory(object):
         for container in containers:
             if(container.name == self.name):
                 launch = False
+                self.container = container
                 logging.info(f'Container with name {container.name} already exists.\
                             \nAccepting only configurations options.')
 
@@ -43,9 +46,14 @@ class ContainerFactory(object):
         if(launch):
             self.launch_container()
             self.setup_container()
+        else:
+            self.fill_object()
         
         for script in self.scripts:
             self.run_script(script)
+
+        for dir_path in self.mounts:
+            self.share_directory(dir_path)
         
 
     # Add Option parser to configure container creation
@@ -54,10 +62,12 @@ class ContainerFactory(object):
         parser = OptionParser(usage)
         parser.add_option('-a','--alias', dest="alias",
                         help="specify image alias at container creation")
-        parser.add_option('-l','--load', action='append', dest='script',
+        parser.add_option('-p','--priv', dest="privileged", action="store_true",
+                        help="privileged container: security.privileged=true")
+        parser.add_option('-m','--mount', dest='mounts', action='append',
+                        help="mount specified directory in container at /home/ubuntu/<directory>")
+        parser.add_option('-l','--load', dest='scripts', action='append',
                         help="load shell script to be run in the container as root")
-        parser.add_option('-i','--install', action='append', dest='install',
-                        help="load json file that containes installlations")
         parser.add_option('--arch', dest="arch",
                         help="specify architecture")
         parser.add_option('--sysarch', dest="sysarch", action="store_true",
@@ -79,17 +89,37 @@ class ContainerFactory(object):
         if(options.alias):
             self.alias = options.alias
 
-        if(options.script):
-            self.scripts = options.script
+        if(options.scripts):
+            self.scripts = options.scripts
 
-        if(options.install):
-            self.install = options.install
+        if(options.privileged):
+            self.privileged = options.privileged
+
+        if(options.mounts):
+            self.mounts = options.mounts
+
+
+    def fill_object(self):
+        def resolve_bool(bool_str):
+            return True if bool_str=='true' else False
+        self.alias = self.container.config['image.os'] + '/' + self.container.config['image.release']
+        self.arch = self.container.config['image.architecture']
+        try:
+            self.privileged = resolve_bool(self.container.config['security.privileged'])
+        except:
+            self.privileged = False
+        logging.info(f'Container {self.container.name} info: (alias, arch, privileged) = ({self.alias},{self.arch},{self.privileged})')
 
     def launch_container(self):
         # Default config for our container
+        def resolve_bool(bool_val):
+            return 'true' if bool_val else 'false'
+
         config = {
             'architecture': self.arch,
-            'config': {},
+            'config': {
+                'security.privileged': resolve_bool(self.privileged)
+            },
             'devices': {},
             'name': self.name,
             'source': {
@@ -148,3 +178,18 @@ class ContainerFactory(object):
         logging.info(f"result: {result.exit_code}")
         logging.info(f"stdout: {result.stdout}")
         logging.info(f"stderr: {result.stderr}")
+
+    def share_directory(self, dirsource):
+        # If the container is privileged then we can mount the directory
+        dirsplit = dirsource.split('/')
+        dirname = dirsplit[-1]
+        dirdest = '/home/ubuntu/' + dirname
+        if(self.privileged):
+            if(dirsplit[0]=='.' or len(dirsplit)==1):
+                dirsource = os.getcwd() + '/' + dirname
+            logging.info(f'Container privileged: lxc config device add {self.container.name} {"sha2-design"} disk source={dirsource} path={dirdest}')
+            self.container.devices.update({'test-dev':{'path':'/home/ubuntu/test-dir', 'source': '/home/cristi/Documents/Scripts/Python/LXD/pylxd-dev/test-dir', 'type': 'disk'}})
+            self.container.save(wait=True)
+        else:
+            logging.info(f'Container unprivileged: Copy directory {dirsource} to {dirdest}')
+            self.container.files.recursive_put(dirsource, dirdest, mode='0764', uid=1000, gid=1000)
