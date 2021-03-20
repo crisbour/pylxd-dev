@@ -12,6 +12,7 @@ class ContainerFactory(object):
     arch = ''
     alias = ''
     privileged = False
+    profilenames = ['default']
     scripts = []
     mounts = []
     _available_arch = ['amd64', 'x86_64', 'aarch64', 'i686', 'ppc64le', 's390x']
@@ -62,12 +63,14 @@ class ContainerFactory(object):
         parser = OptionParser(usage)
         parser.add_option('-a','--alias', dest="alias",
                         help="specify image alias at container creation")
-        parser.add_option('-p','--priv', dest="privileged", action="store_true",
+        parser.add_option('-P','--priv', dest="privileged", action="store_true",
                         help="privileged container: security.privileged=true")
         parser.add_option('-m','--mount', dest='mounts', action='append',
                         help="mount specified directory in container at /home/ubuntu/<directory>")
         parser.add_option('-l','--load', dest='scripts', action='append',
                         help="load shell script to be run in the container as root")
+        parser.add_option('-p','--profile', dest='profiles', action='append',
+                        help="profile names to be added to config of container")
         parser.add_option('--arch', dest="arch",
                         help="specify architecture")
         parser.add_option('--sysarch', dest="sysarch", action="store_true",
@@ -97,6 +100,10 @@ class ContainerFactory(object):
 
         if(options.mounts):
             self.mounts = options.mounts
+
+        if(options.profiles):
+            for elem in options.profiles:
+                self.profilenames.append(elem)
 
 
     def fill_object(self):
@@ -128,7 +135,8 @@ class ContainerFactory(object):
                 'mode': 'pull',
                 'protocol': 'simplestreams',
                 'server': 'https://images.linuxcontainers.org'
-                }
+                },
+            'profiles': self.profilenames
             }
 
         # Create and start te container
